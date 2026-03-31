@@ -8,6 +8,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.3.1] - 2026-03-31
+
+### Changed
+
+- Update composer dependencies, fix cs issues @julien-nc [#353](https://github.com/nextcloud/integration_openai/pull/353)
+
+### Fixed
+
+- Fix: Follow override image gen service URL @julien-nc [#352](https://github.com/nextcloud/integration_openai/pull/352)
+- fix: Correct error message for text to speech generation [#356](https://github.com/nextcloud/integration_openai/pull/356)
+
 ## 4.3.0 - 2026-02-26
 
 ### Changed
