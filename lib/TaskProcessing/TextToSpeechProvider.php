@@ -163,8 +163,8 @@ class TextToSpeechProvider implements ISynchronousWatermarkingProvider {
 
 			return ['speech' => $audio];
 		} catch (\Exception $e) {
-			$this->logger->warning('OpenAI/LocalAI\'s text to image generation failed with: ' . $e->getMessage(), ['exception' => $e]);
-			throw new RuntimeException('OpenAI/LocalAI\'s text to image generation failed with: ' . $e->getMessage());
+			$this->logger->warning('OpenAI/LocalAI\'s text to speech generation failed with: ' . $e->getMessage(), ['exception' => $e]);
+			throw new RuntimeException('OpenAI/LocalAI\'s text to speech generation failed with: ' . $e->getMessage());
 		}
 	}
 }
