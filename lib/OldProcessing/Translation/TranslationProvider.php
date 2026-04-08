@@ -13,9 +13,9 @@ use Exception;
 use OCA\OpenAi\AppInfo\Application;
 use OCA\OpenAi\Service\OpenAiAPIService;
 use OCA\OpenAi\Service\OpenAiSettingsService;
+use OCA\OpenAi\Service\TranslateService;
 use OCP\IAppConfig;
 use OCP\ICacheFactory;
-use OCP\L10N\IFactory;
 use OCP\Translation\IDetectLanguageProvider;
 use OCP\Translation\ITranslationProvider;
 use OCP\Translation\LanguageTuple;
@@ -25,7 +25,6 @@ use RuntimeException;
 class TranslationProvider implements ITranslationProvider, IDetectLanguageProvider {
 	public function __construct(
 		private ICacheFactory $cacheFactory,
-		private IFactory $l10nFactory,
 		private OpenAiAPIService $openAiAPIService,
 		private LoggerInterface $logger,
 		private IAppConfig $appConfig,
@@ -46,8 +45,7 @@ class TranslationProvider implements ITranslationProvider, IDetectLanguageProvid
 			}, $cached);
 		}
 
-		$coreL = $this->l10nFactory->getLanguages();
-		$languages = array_merge($coreL['commonLanguages'], $coreL['otherLanguages']);
+		$languages = TranslateService::getStaticLanguages();
 
 		$availableLanguages = [];
 		foreach ($languages as $sourceLanguage) {
@@ -89,15 +87,6 @@ class TranslationProvider implements ITranslationProvider, IDetectLanguageProvid
 		return null;
 	}
 
-	private function getCoreLanguagesByCode(): array {
-		$coreL = $this->l10nFactory->getLanguages();
-		$coreLanguages = array_reduce(array_merge($coreL['commonLanguages'], $coreL['otherLanguages']), function ($carry, $val) {
-			$carry[$val['code']] = $val['name'];
-			return $carry;
-		});
-		return $coreLanguages;
-	}
-
 	public function translate(?string $fromLanguage, string $toLanguage, string $text): string {
 		$cacheKey = ($fromLanguage ?? '') . '/' . $toLanguage . '/' . md5($text);
 
@@ -107,7 +96,7 @@ class TranslationProvider implements ITranslationProvider, IDetectLanguageProvid
 		}
 
 		try {
-			$coreLanguages = $this->getCoreLanguagesByCode();
+			$coreLanguages = TranslateService::getCoreLanguagesByCode();
 
 			$toLanguage = $coreLanguages[$toLanguage];
 			if ($fromLanguage !== null) {

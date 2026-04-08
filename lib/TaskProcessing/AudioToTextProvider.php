@@ -68,7 +68,7 @@ class AudioToTextProvider implements ISynchronousProvider {
 	public function getOptionalInputShapeEnumValues(): array {
 		$languageEnumValues = array_map(static function (array $language) {
 			return new ShapeEnumValue($language[1], $language[0]);
-		}, Application::AUDIO_TO_TEXT_LANGUAGES);
+		}, Application::LANGUAGE_CODES_AND_ENDONYMS);
 		$detectLanguageEnumValue = new ShapeEnumValue($this->l->t('Detect language'), 'detect_language');
 		$defaultLanguageEnumValue = new ShapeEnumValue($this->l->t('Default'), 'default');
 		return ['language' => array_merge([$detectLanguageEnumValue, $defaultLanguageEnumValue], $languageEnumValues)];
