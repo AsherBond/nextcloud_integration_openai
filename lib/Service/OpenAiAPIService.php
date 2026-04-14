@@ -1166,7 +1166,7 @@ class OpenAiAPIService {
 						} else {
 							$sleep = (int)$retryAfter;
 						}
-						$sleep += random_int(10, 50); // add some jitter to avoid thundering herd problem
+						$sleep += random_int(5, 30); // add some jitter to avoid thundering herd problem
 					}
 					$this->logger->warning("Rate limit exceeded, retrying in $sleep seconds", ['retry_count' => $retryCount]);
 					sleep($sleep);
