@@ -50,6 +50,7 @@ class OpenAiAPIService {
 		private INotificationManager $notificationManager,
 		private QuotaRuleService $quotaRuleService,
 		IClientService $clientService,
+		private bool $isCLI,
 	) {
 		$this->client = $clientService->newClient();
 	}
@@ -1017,12 +1018,14 @@ class OpenAiAPIService {
 	 * @param string|null $contentType
 	 * @param bool $logErrors if set to false error logs will be suppressed
 	 * @param string|null $serviceType
+	 * @param int $retryCount number of retries that have been attempted so far
 	 * @return array decoded request result or error
 	 * @throws Exception
 	 */
 	public function request(
 		?string $userId, string $endPoint, array $params = [], string $method = 'GET',
 		?string $contentType = null, bool $logErrors = true, ?string $serviceType = null,
+		int $retryCount = 0,
 	): array {
 		try {
 			if ($serviceType === Application::SERVICE_TYPE_IMAGE && $this->openAiSettingsService->imageOverrideEnabled()) {
@@ -1145,6 +1148,33 @@ class OpenAiAPIService {
 			}
 			return ['body' => $body];
 		} catch (ClientException|ServerException $e) {
+			if ($e->getResponse()->getStatusCode() === Http::STATUS_TOO_MANY_REQUESTS) {
+				if ($retryCount < 3 && $this->isCLI) {
+					if (empty($e->getResponse()->getHeader('Retry-After'))) {
+						$sleep = random_int(10, 120);
+					} else {
+						$retryAfter = $e->getResponse()->getHeader('Retry-After')[0];
+						if ((string)(int)$retryAfter !== $retryAfter) {
+							// if it's not an integer, it might be a date
+							$retryAfterTime = strtotime($retryAfter);
+							if ($retryAfterTime !== false) {
+								$sleep = max(0, $retryAfterTime - time());
+							} else {
+								// fallback to random sleep if the header is not parsable
+								$sleep = random_int(10, 120);
+							}
+						} else {
+							$sleep = (int)$retryAfter;
+						}
+						$sleep += random_int(5, 30); // add some jitter to avoid thundering herd problem
+					}
+					$this->logger->warning("Rate limit exceeded, retrying in $sleep seconds", ['retry_count' => $retryCount]);
+					sleep($sleep);
+					return $this->request($userId, $endPoint, $params, $method, $contentType, $logErrors, $serviceType, $retryCount + 1);
+				} else {
+					$this->logger->warning('Rate limit exceeded, maximum retries reached', ['retry_count' => $retryCount]);
+				}
+			}
 			$responseBody = $e->getResponse()->getBody();
 			$parsedResponseBody = json_decode($responseBody, true);
 			if ($logErrors) {
