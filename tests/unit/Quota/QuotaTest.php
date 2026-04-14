@@ -87,6 +87,7 @@ class QuotaTest extends TestCase {
 			$this->notificationManager,
 			\OCP\Server::get(QuotaRuleService::class),
 			\OCP\Server::get(IClientService::class),
+			true
 		);
 	}
 

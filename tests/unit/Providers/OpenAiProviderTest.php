@@ -88,6 +88,7 @@ class OpenAiProviderTest extends TestCase {
 			$this->createMock(\OCP\Notification\IManager::class),
 			\OCP\Server::get(QuotaRuleService::class),
 			$clientService,
+			true,
 		);
 
 		$this->openAiSettingsService->setUserApiKey(self::TEST_USER1, 'This is a PHPUnit test API key');
