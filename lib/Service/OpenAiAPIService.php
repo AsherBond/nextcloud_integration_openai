@@ -50,6 +50,7 @@ class OpenAiAPIService {
 		private INotificationManager $notificationManager,
 		private QuotaRuleService $quotaRuleService,
 		IClientService $clientService,
+		private bool $isCLI,
 	) {
 		$this->client = $clientService->newClient();
 	}
@@ -1148,7 +1149,7 @@ class OpenAiAPIService {
 			return ['body' => $body];
 		} catch (ClientException|ServerException $e) {
 			if ($e->getResponse()->getStatusCode() === Http::STATUS_TOO_MANY_REQUESTS) {
-				if ($retryCount < 3) {
+				if ($retryCount < 3 && $this->isCLI) {
 					if (empty($e->getResponse()->getHeader('Retry-After'))) {
 						$sleep = random_int(10, 120);
 					} else {
@@ -1165,7 +1166,7 @@ class OpenAiAPIService {
 						} else {
 							$sleep = (int)$retryAfter;
 						}
-						$sleep += random_int(10, 50);
+						$sleep += random_int(10, 50); // add some jitter to avoid thundering herd problem
 					}
 					$this->logger->warning("Rate limit exceeded, retrying in $sleep seconds", ['retry_count' => $retryCount]);
 					sleep($sleep);
