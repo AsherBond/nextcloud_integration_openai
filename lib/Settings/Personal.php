@@ -33,7 +33,7 @@ class Personal implements ISettings {
 		$userConfig = $this->openAiSettingsService->getUserConfig($this->userId);
 		$userConfig['api_key'] = $userConfig['api_key'] === '' ? '' : 'dummyApiKey';
 		$userConfig['basic_password'] = $userConfig['basic_password'] === '' ? '' : 'dummyPassword';
-		$languages = Application::AUDIO_TO_TEXT_LANGUAGES;
+		$languages = Application::LANGUAGE_CODES_AND_ENDONYMS;
 		array_unshift($languages, ['detect_language', $this->l->t('Detect language')]);
 		$languages = array_map(static function (array $language) use ($userConfig) {
 			return [

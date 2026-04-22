@@ -512,7 +512,6 @@ class OpenAiProviderTest extends TestCase {
 			\OCP\Server::get(IAppConfig::class),
 			$this->openAiSettingsService,
 			$this->createMock(\OCP\IL10N::class),
-			\OCP\Server::get(\OCP\L10N\IFactory::class),
 			$this->createMock(\OCP\ICacheFactory::class),
 			$this->createMock(\Psr\Log\LoggerInterface::class),
 			$this->chunkService,

@@ -14,10 +14,10 @@ use OCA\OpenAi\AppInfo\Application;
 use OCA\OpenAi\Service\ChunkService;
 use OCA\OpenAi\Service\OpenAiAPIService;
 use OCA\OpenAi\Service\OpenAiSettingsService;
+use OCA\OpenAi\Service\TranslateService;
 use OCP\IAppConfig;
 use OCP\ICacheFactory;
 use OCP\IL10N;
-use OCP\L10N\IFactory;
 use OCP\TaskProcessing\EShapeType;
 use OCP\TaskProcessing\Exception\ProcessingException;
 use OCP\TaskProcessing\Exception\UserFacingProcessingException;
@@ -57,7 +57,6 @@ class TranslateProvider implements ISynchronousProvider {
 		private IAppConfig $appConfig,
 		private OpenAiSettingsService $openAiSettingsService,
 		private IL10N $l,
-		private IFactory $l10nFactory,
 		private ICacheFactory $cacheFactory,
 		private LoggerInterface $logger,
 		private ChunkService $chunkService,
@@ -82,8 +81,7 @@ class TranslateProvider implements ISynchronousProvider {
 	}
 
 	public function getInputShapeEnumValues(): array {
-		$coreL = $this->l10nFactory->getLanguages();
-		$languages = array_merge($coreL['commonLanguages'], $coreL['otherLanguages']);
+		$languages = TranslateService::getStaticLanguages();
 		$languageEnumValues = array_map(static function (array $language) {
 			return new ShapeEnumValue($language['name'], $language['code']);
 		}, $languages);
@@ -143,15 +141,6 @@ class TranslateProvider implements ISynchronousProvider {
 		return [];
 	}
 
-	private function getCoreLanguagesByCode(): array {
-		$coreL = $this->l10nFactory->getLanguages();
-		$coreLanguages = array_reduce(array_merge($coreL['commonLanguages'], $coreL['otherLanguages']), function ($carry, $val) {
-			$carry[$val['code']] = $val['name'];
-			return $carry;
-		});
-		return $coreLanguages;
-	}
-
 	public function process(?string $userId, array $input, callable $reportProgress): array {
 		/*
 		foreach (range(1, 20) as $i) {
@@ -185,7 +174,7 @@ class TranslateProvider implements ISynchronousProvider {
 		$increase = 1.0 / (float)count($chunks);
 		$progress = 0.0;
 		try {
-			$coreLanguages = $this->getCoreLanguagesByCode();
+			$coreLanguages = TranslateService::getCoreLanguagesByCode();
 
 			$fromLanguage = $input['origin_language'];
 			$toLanguage = $coreLanguages[$input['target_language']] ?? $input['target_language'];
