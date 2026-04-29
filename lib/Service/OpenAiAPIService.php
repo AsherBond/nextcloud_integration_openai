@@ -623,6 +623,10 @@ class OpenAiAPIService {
 			$msgs = json_decode($toolMessage, true);
 			foreach ($msgs as $msg) {
 				$msg['role'] = 'tool';
+				if (!is_string($msg['content'])) {
+					// IONOS requires tool contents to be strings
+					$msg['content'] = json_encode($msg['content']);
+				}
 				$messages[] = $msg;
 			}
 		}
