@@ -8,6 +8,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.4.0] - 2026-05-04
+
+### Added
+
+- Add retry logic for HTTP 429 responses in OpenAiAPIService @marcelklehr [#359](https://github.com/nextcloud/integration_openai/pull/359)
+
+### Fixed
+
+- Use static language list instead of l10nFactory for translation providers @bakiburakogun [#358](https://github.com/nextcloud/integration_openai/pull/358)
+- Ensure tool message content is a string @marcelklehr [#360](https://github.com/nextcloud/integration_openai/pull/360)
+
 ## [4.3.1] - 2026-03-31
 
 ### Changed
